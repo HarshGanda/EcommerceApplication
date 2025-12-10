@@ -13,4 +13,9 @@ public class ProductDto {
     private String description;
     private Double price;
     private CategoryDto category;
+    private Integer stockQuantity;
+    private Boolean inStock;
+    private String imageUrl;
+    private String brand;
+    private Double rating;
 }

@@ -74,6 +74,10 @@ public class ProductController {
         product.setName(dto.getName());
         product.setDescription(dto.getDescription());
         product.setPrice(dto.getPrice());
+        product.setStockQuantity(dto.getStockQuantity());
+        product.setImageUrl(dto.getImageUrl());
+        product.setBrand(dto.getBrand());
+        product.setRating(dto.getRating());
         if (dto.getCategory() != null) {
             Category category = new Category();
             category.setId(dto.getCategory().getId());
