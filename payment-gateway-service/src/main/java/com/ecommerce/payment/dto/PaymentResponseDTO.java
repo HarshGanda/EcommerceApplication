@@ -7,11 +7,11 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PaymentRequestDTO {
-    private Long orderId;
-    private Long userId;
+public class PaymentResponseDTO {
+    private String paymentId;
+    private String status;
+    private String message;
     private Double amount;
     private String currency;
-    private String method; // "razorpay" or "stripe"
 }
 

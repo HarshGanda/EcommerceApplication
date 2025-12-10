@@ -1,29 +1,28 @@
 package com.ecommerce.payment.controller;
 
-import com.ecommerce.payment.dto.PaymentRequest;
+import com.ecommerce.payment.dto.PaymentRequestDTO;
+import com.ecommerce.payment.dto.PaymentResponseDTO;
+import com.ecommerce.payment.service.IPaymentService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/payments")
 public class PaymentController {
 
+    @Autowired
+    private IPaymentService paymentService;
+
     @PostMapping("/initiate")
-    public Map<String, String> initiatePayment(@RequestBody PaymentRequestDTO request) {
-        // Implementation for payment initiation
-        Map<String, String> response = new HashMap<>();
-        response.put("paymentId", "pay_" + System.currentTimeMillis());
-        response.put("status", "initiated");
-        return response;
+    public ResponseEntity<PaymentResponseDTO> initiatePayment(@RequestBody PaymentRequestDTO request) {
+        PaymentResponseDTO response = paymentService.initiatePayment(request);
+        return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/status/{id}")
-    public Map<String, String> getPaymentStatus(@PathVariable String id) {
-        Map<String, String> response = new HashMap<>();
-        response.put("paymentId", id);
-        response.put("status", "success");
-        return response;
+    @GetMapping("/status/{paymentId}")
+    public ResponseEntity<PaymentResponseDTO> getPaymentStatus(@PathVariable String paymentId) {
+        PaymentResponseDTO response = paymentService.getPaymentStatus(paymentId);
+        return ResponseEntity.ok(response);
     }
 }

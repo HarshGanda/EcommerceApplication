@@ -11,7 +11,10 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>auth-service</module>
+        <module>catalog-service</module>
         <module>notification-service</module>
+        <module>payment-gateway-service</module>
         <module>discovery-service</module>
     </modules>
 
