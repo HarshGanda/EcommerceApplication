@@ -3,6 +3,7 @@ package com.ecommerce.catalog.controller;
 import com.ecommerce.catalog.dto.CategoryDto;
 import com.ecommerce.catalog.entity.Category;
 import com.ecommerce.catalog.service.ICategoryService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,14 +37,14 @@ public class CategoryController {
     }
 
     @PostMapping
-    public ResponseEntity<CategoryDto> createCategory(@RequestBody CategoryDto categoryDto) {
+    public ResponseEntity<CategoryDto> createCategory(@Valid @RequestBody CategoryDto categoryDto) {
         Category category = convertToEntity(categoryDto);
         Category savedCategory = categoryService.save(category);
         return ResponseEntity.ok(convertToDto(savedCategory));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CategoryDto> updateCategory(@PathVariable Long id, @RequestBody CategoryDto categoryDto) {
+    public ResponseEntity<CategoryDto> updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryDto categoryDto) {
         Category category = convertToEntity(categoryDto);
         Category updatedCategory = categoryService.updateCategory(id, category);
         if (updatedCategory != null) {

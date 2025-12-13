@@ -5,6 +5,7 @@ import com.ecommerce.catalog.dto.ProductDto;
 import com.ecommerce.catalog.entity.Category;
 import com.ecommerce.catalog.entity.Product;
 import com.ecommerce.catalog.service.IProductService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,14 +36,14 @@ public class ProductController {
     }
 
     @PostMapping
-    public ProductDto createProduct(@RequestBody ProductDto productDto) {
+    public ProductDto createProduct(@Valid @RequestBody ProductDto productDto) {
         Product product = convertToEntity(productDto);
         Product savedProduct = productService.save(product);
         return convertToDto(savedProduct);
     }
 
     @PutMapping("/{id}")
-    public ProductDto updateProduct(@PathVariable Long id, @RequestBody ProductDto productDto) {
+    public ProductDto updateProduct(@PathVariable Long id, @Valid @RequestBody ProductDto productDto) {
         Product product = convertToEntity(productDto);
         Product updatedProduct = productService.replaceProduct(id, product);
         return convertToDto(updatedProduct);

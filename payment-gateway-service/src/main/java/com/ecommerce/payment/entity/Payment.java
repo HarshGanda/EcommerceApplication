@@ -1,6 +1,8 @@
 package com.ecommerce.payment.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,10 +20,14 @@ public class Payment {
 
     private String paymentId;
 
+    @NotNull(message = "Order ID is required")
     private Long orderId;
 
+    @NotNull(message = "User ID is required")
     private Long userId;
 
+    @NotNull(message = "Amount is required")
+    @Positive(message = "Amount must be positive")
     private Double amount;
 
     private String currency;

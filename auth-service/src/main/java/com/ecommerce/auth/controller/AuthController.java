@@ -3,6 +3,7 @@ package com.ecommerce.auth.controller;
 import com.ecommerce.auth.dto.TokenValidationRequest;
 import com.ecommerce.auth.dto.UserDto;
 import com.ecommerce.auth.service.IAuthService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +19,7 @@ public class AuthController {
     private IAuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> login(@RequestBody UserDto userDto) {
+    public ResponseEntity<Map<String, String>> login(@Valid @RequestBody UserDto userDto) {
         try {
             String token = authService.login(userDto.getEmail(), userDto.getPassword());
             Map<String, String> response = new HashMap<>();

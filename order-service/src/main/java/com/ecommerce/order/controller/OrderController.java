@@ -2,6 +2,7 @@ package com.ecommerce.order.controller;
 
 import com.ecommerce.order.dto.OrderDto;
 import com.ecommerce.order.service.IOrderService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +18,7 @@ public class OrderController {
     private IOrderService orderService;
 
     @PostMapping
-    public ResponseEntity<OrderDto> createOrder(@RequestBody OrderDto orderDto) {
+    public ResponseEntity<OrderDto> createOrder(@Valid @RequestBody OrderDto orderDto) {
         try {
             OrderDto createdOrder = orderService.createOrder(orderDto);
             return ResponseEntity.ok(createdOrder);

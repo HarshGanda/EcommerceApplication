@@ -3,6 +3,7 @@ package com.ecommerce.payment.controller;
 import com.ecommerce.payment.dto.PaymentRequestDTO;
 import com.ecommerce.payment.dto.PaymentResponseDTO;
 import com.ecommerce.payment.service.IPaymentService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +16,7 @@ public class PaymentController {
     private IPaymentService paymentService;
 
     @PostMapping("/initiate")
-    public ResponseEntity<PaymentResponseDTO> initiatePayment(@RequestBody PaymentRequestDTO request) {
+    public ResponseEntity<PaymentResponseDTO> initiatePayment(@Valid @RequestBody PaymentRequestDTO request) {
         PaymentResponseDTO response = paymentService.initiatePayment(request);
         return ResponseEntity.ok(response);
     }
