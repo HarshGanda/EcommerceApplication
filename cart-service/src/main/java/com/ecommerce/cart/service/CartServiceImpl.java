@@ -9,10 +9,14 @@ import com.ecommerce.cart.repository.CartRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,6 +24,9 @@ public class CartServiceImpl implements ICartService {
 
     @Autowired
     private CartRepository cartRepository;
+
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Override
     @Cacheable(value = "cart", key = "#userId")
@@ -114,6 +121,41 @@ public class CartServiceImpl implements ICartService {
         cart.getItems().clear();
         cart.setTotalAmount(0.0);
         cartRepository.save(cart);
+    }
+
+    @Override
+    public Map<String, Object> getCartSummary(Long userId) {
+        // Use RedisTemplate for direct Redis operations
+        String summaryKey = "cart:summary:" + userId;
+
+        // Try to get from Redis first
+        @SuppressWarnings("unchecked")
+        Map<String, Object> cachedSummary = (Map<String, Object>) redisTemplate.opsForValue().get(summaryKey);
+
+        if (cachedSummary != null) {
+            return cachedSummary;
+        }
+
+        // Calculate summary from database
+        Cart cart = cartRepository.findByUserId(userId).orElse(null);
+        Map<String, Object> summary = new HashMap<>();
+
+        if (cart != null) {
+            summary.put("userId", userId);
+            summary.put("itemCount", cart.getItems().size());
+            summary.put("totalAmount", cart.getTotalAmount());
+            summary.put("lastUpdated", System.currentTimeMillis());
+        } else {
+            summary.put("userId", userId);
+            summary.put("itemCount", 0);
+            summary.put("totalAmount", 0.0);
+            summary.put("lastUpdated", System.currentTimeMillis());
+        }
+
+        // Store in Redis with 5 minutes TTL using RedisTemplate
+        redisTemplate.opsForValue().set(summaryKey, summary, 5, TimeUnit.MINUTES);
+
+        return summary;
     }
 
     private CartDto convertToDto(Cart cart) {
