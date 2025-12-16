@@ -1,64 +1,65 @@
 version: '3.8'
-    driver: bridge
-  ecommerce-network:
-networks:
 
-  mysql-data:
-volumes:
-
-      - ecommerce-network
-    networks:
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_BROKER_ID: 1
-    environment:
-      - "9092:9092"
-    ports:
-      - zookeeper
-    depends_on:
-    container_name: ecommerce-kafka
-    image: confluentinc/cp-kafka:7.4.0
-  kafka:
-  # Kafka
-
-      - ecommerce-network
-    networks:
-      - "2181:2181"
-    ports:
-      ZOOKEEPER_TICK_TIME: 2000
-      ZOOKEEPER_CLIENT_PORT: 2181
-    environment:
-    container_name: ecommerce-zookeeper
-    image: confluentinc/cp-zookeeper:7.4.0
-  zookeeper:
-  # Zookeeper (required for Kafka)
-
-      - ecommerce-network
-    networks:
-      - "6379:6379"
-    ports:
-    container_name: ecommerce-redis
-    image: redis:7-alpine
-  redis:
-  # Redis Cache
-
-      - ecommerce-network
-    networks:
-      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
-      - mysql-data:/var/lib/mysql
-    volumes:
-      - "3306:3306"
-    ports:
-      MYSQL_DATABASE: auth_db
-      MYSQL_ROOT_PASSWORD: root_password
-    environment:
-    container_name: ecommerce-mysql
-    image: mysql:8.0
-  mysql:
-  # MySQL Database
 services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: ecommerce-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: ecommerce_db
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - ecommerce-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: ecommerce-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - ecommerce-network
+
+  # Zookeeper (required for Kafka)
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    container_name: ecommerce-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    networks:
+      - ecommerce-network
+
+  # Kafka
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: ecommerce-kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+    networks:
+      - ecommerce-network
+
+volumes:
+  mysql-data:
+
+networks:
+  ecommerce-network:
+    driver: bridge
 
 
