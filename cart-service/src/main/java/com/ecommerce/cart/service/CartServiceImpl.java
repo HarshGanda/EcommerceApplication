@@ -25,7 +25,7 @@ public class CartServiceImpl implements ICartService {
     @Autowired
     private CartRepository cartRepository;
 
-    @Autowired
+    @Autowired(required = false)
     private RedisTemplate<String, Object> redisTemplate;
 
     @Override
@@ -128,9 +128,17 @@ public class CartServiceImpl implements ICartService {
         // Use RedisTemplate for direct Redis operations
         String summaryKey = "cart:summary:" + userId;
 
-        // Try to get from Redis first
-        @SuppressWarnings("unchecked")
-        Map<String, Object> cachedSummary = (Map<String, Object>) redisTemplate.opsForValue().get(summaryKey);
+        // Try to get from Redis first (if available)
+        Map<String, Object> cachedSummary = null;
+        try {
+            if (redisTemplate != null) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> cached = (Map<String, Object>) redisTemplate.opsForValue().get(summaryKey);
+                cachedSummary = cached;
+            }
+        } catch (Exception e) {
+            // Redis not available, continue with database
+        }
 
         if (cachedSummary != null) {
             return cachedSummary;
@@ -142,18 +150,26 @@ public class CartServiceImpl implements ICartService {
 
         if (cart != null) {
             summary.put("userId", userId);
-            summary.put("itemCount", cart.getItems().size());
+            summary.put("totalItems", cart.getItems().size());
+            summary.put("totalQuantity", cart.getItems().stream().mapToInt(CartItem::getQuantity).sum());
             summary.put("totalAmount", cart.getTotalAmount());
             summary.put("lastUpdated", System.currentTimeMillis());
         } else {
             summary.put("userId", userId);
-            summary.put("itemCount", 0);
+            summary.put("totalItems", 0);
+            summary.put("totalQuantity", 0);
             summary.put("totalAmount", 0.0);
             summary.put("lastUpdated", System.currentTimeMillis());
         }
 
-        // Store in Redis with 5 minutes TTL using RedisTemplate
-        redisTemplate.opsForValue().set(summaryKey, summary, 5, TimeUnit.MINUTES);
+        // Store in Redis with 5 minutes TTL using RedisTemplate (if available)
+        try {
+            if (redisTemplate != null) {
+                redisTemplate.opsForValue().set(summaryKey, summary, 5, TimeUnit.MINUTES);
+            }
+        } catch (Exception e) {
+            // Redis not available, ignore
+        }
 
         return summary;
     }
