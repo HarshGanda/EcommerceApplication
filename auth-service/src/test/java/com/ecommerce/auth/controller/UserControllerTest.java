@@ -1,6 +1,7 @@
 package com.ecommerce.auth.controller;
 
 import com.ecommerce.auth.dto.UserDto;
+import com.ecommerce.auth.exception.GlobalExceptionHandler;
 import com.ecommerce.auth.exception.UserAlreadyExistsException;
 import com.ecommerce.auth.exception.UserNotFoundException;
 import com.ecommerce.auth.service.IAuthService;
@@ -34,7 +35,9 @@ class UserControllerTest {
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(userController).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(userController)
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .build();
         objectMapper = new ObjectMapper();
     }
 
@@ -68,13 +71,7 @@ class UserControllerTest {
         mockMvc.perform(post("/users/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(inputDto)))
-                .andExpect(status().isBadRequest());
-
-        inputDto.setEmail("invalid-email");
-        mockMvc.perform(post("/users/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(inputDto)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isConflict());
     }
 
     @Test

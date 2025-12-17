@@ -75,7 +75,7 @@ class AuthServiceImplTest {
         assertFalse(authService.validateToken("invalid"));
 
         when(userRepository.findByEmail("wrong@example.com")).thenReturn(Optional.empty());
-        assertThrows(UserNotFoundException.class, () -> authService.login("wrong@example.com", password));
+        assertThrows(InvalidCredentialsException.class, () -> authService.login("wrong@example.com", password));
 
         when(passwordEncoder.matches("wrongPassword", testUser.getPassword())).thenReturn(false);
         assertThrows(InvalidCredentialsException.class, () -> authService.login(email, "wrongPassword"));

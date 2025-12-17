@@ -16,21 +16,13 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<UserDto> register(@Valid @RequestBody UserDto userDto) {
-        try {
-            UserDto response = authService.register(userDto);
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        UserDto response = authService.register(userDto);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<UserDto> getUser(@PathVariable Long id) {
-        try {
-            UserDto user = authService.getUserById(id);
-            return ResponseEntity.ok(user);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+        UserDto user = authService.getUserById(id);
+        return ResponseEntity.ok(user);
     }
 }

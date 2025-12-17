@@ -20,17 +20,11 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(@Valid @RequestBody UserDto userDto) {
-        try {
-            String token = authService.login(userDto.getEmail(), userDto.getPassword());
-            Map<String, String> response = new HashMap<>();
-            response.put("token", token);
-            response.put("message", "Login successful");
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            Map<String, String> response = new HashMap<>();
-            response.put("error", e.getMessage());
-            return ResponseEntity.badRequest().body(response);
-        }
+        String token = authService.login(userDto.getEmail(), userDto.getPassword());
+        Map<String, String> response = new HashMap<>();
+        response.put("token", token);
+        response.put("message", "Login successful");
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/validate")

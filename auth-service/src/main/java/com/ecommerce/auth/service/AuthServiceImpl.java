@@ -31,7 +31,7 @@ public class AuthServiceImpl implements IAuthService {
     @Override
     public String login(String email, String password) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("User not found with email: " + email));
+                .orElseThrow(() -> new InvalidCredentialsException());
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new InvalidCredentialsException();

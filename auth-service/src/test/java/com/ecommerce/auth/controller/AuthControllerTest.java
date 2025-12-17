@@ -2,6 +2,7 @@ package com.ecommerce.auth.controller;
 
 import com.ecommerce.auth.dto.TokenValidationRequest;
 import com.ecommerce.auth.dto.UserDto;
+import com.ecommerce.auth.exception.GlobalExceptionHandler;
 import com.ecommerce.auth.exception.InvalidCredentialsException;
 import com.ecommerce.auth.exception.UserNotFoundException;
 import com.ecommerce.auth.service.IAuthService;
@@ -35,7 +36,9 @@ class AuthControllerTest {
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(authController).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(authController)
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .build();
         objectMapper = new ObjectMapper();
     }
 
@@ -65,20 +68,20 @@ class AuthControllerTest {
         mockMvc.perform(post("/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(invalidUser)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").exists());
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").exists());
 
         UserDto nonExistentUser = new UserDto();
         nonExistentUser.setEmail("notfound@example.com");
         nonExistentUser.setPassword("password123");
         when(authService.login("notfound@example.com", "password123"))
-                .thenThrow(new UserNotFoundException("User not found"));
+                .thenThrow(new InvalidCredentialsException());
 
         mockMvc.perform(post("/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(nonExistentUser)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").exists());
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").exists());
 
         mockMvc.perform(post("/auth/logout"))
                 .andExpect(status().isOk())
